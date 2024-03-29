@@ -5,6 +5,7 @@ import config from '../config';
 
 const bulletConf = config.bullet;
 const enemyConf = config.enemy;
+const awardCharacterConf = config.award.character;
 
 export default class Controller {
 
@@ -20,9 +21,10 @@ export default class Controller {
     reset() {
         this.frame = 0;
 
-        this.character = new Character(this.canvasCtx);
+        this.characters = [ new Character(this.canvasCtx) ];
         this.bullets = [];
         this.enemys = [];
+        this.awardCharacters = [];
 
         this.score = 0;
         this.gameOver = false;
@@ -46,6 +48,13 @@ export default class Controller {
                 this.pool.recoverEnemy(this.enemys.shift());
             }
         })
+        // 更新奖励机
+        this.awardCharacters.forEach(awardCharacter => {
+            awardCharacter.update();
+            if (awardCharacter.isOutTheCanvas()) {
+                this.pool.recoverAwardCharacter(this.awardCharacters.shift());
+            }
+        })
         // 更新子弹
         this.bullets.forEach(bullet => {
             bullet.update();
@@ -57,9 +66,15 @@ export default class Controller {
         if (this.frame % enemyConf.initialGenerateInterval === 0) {
             this.enemys.push(this.pool.getEnemy());
         }
+        // 生成奖励机
+        if (this.frame % awardCharacterConf.initialGenerateInterval === 0) {
+            this.awardCharacters.push(this.pool.getAwardCharacter());
+        }
         // 生成子弹
         if (this.frame % bulletConf.initialGenerateInterval === 0) {
-            this.bullets.push(this.pool.getBullet(this.character));
+            for (const character of this.characters) {
+                this.bullets.push(this.pool.getBullet(character));
+            }
         }
         // 碰撞检测
         this.collisionDetection();
@@ -68,32 +83,52 @@ export default class Controller {
     render() {
         // 渲染敌机
         this.enemys.forEach(enemy => enemy.draw());
+        // 渲染奖励机
+        this.awardCharacters.forEach(awardCharacter => awardCharacter.draw());
         // 渲染子弹
         this.bullets.forEach(bullet => bullet.draw());
         // 渲染本机
-        this.character.draw();
+        this.characters.forEach(character => character.draw());
         // 渲染分数
         this.gameInfo.renderGameScore(this.score);
         // 渲染结束页面
         if (this.gameOver) {
             this.gameInfo.renderGameOver(this.score);
             if (!this.isBindHandler) {
+                // 设置重新开始点击事件
                 this.setRestartHandler();
             }
         }
     }
 
     collisionDetection() {
+        // 敌机碰撞检测
         for (const enemy of this.enemys) {
-            if (enemy.isCollideWith(this.character, 10, 30)) {
-                this.gameOver = true;
-                break;
-            }
             for (const bullet of this.bullets) {
                 if (enemy.isCollideWith(bullet)) {
                     enemy.isVisible(false);
                     bullet.isVisible(false);
                     this.score += 1;
+                    break;
+                }
+            }
+            for (const character of this.characters) {
+                if (enemy.isCollideWith(character, 10, 30)) {
+                    enemy.isVisible(false);
+                    this.characters.shift();
+                    if (this.characters.length === 0) {
+                        this.gameOver = true;
+                    }
+                    break;
+                }
+            }
+        }
+        // 奖励机碰撞检测
+        for (const awardCharacter of this.awardCharacters) {
+            for (const character of this.characters) {
+                if (awardCharacter.isCollideWith(character, 10, 30)) {
+                    awardCharacter.isVisible(false);
+                    this.characters.push(new Character(this.canvasCtx));
                     break;
                 }
             }

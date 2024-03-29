@@ -1,5 +1,6 @@
 import Enemy from '../object/enemy.js';
 import Bullet from '../object/bullet.js';
+import AwardCharacter from '../object/award.character.js';
 
 export default class Pool {
 
@@ -33,6 +34,18 @@ export default class Pool {
 
     recoverEnemy(enemy) {
         this.enemyPool.push(enemy);
+    }
+
+    getAwardCharacter() {
+        const awardCharacter = this.awardCharacterPool.length ? this.awardCharacterPool.shift() : new AwardCharacter(this.canvasCtx);
+        awardCharacter.isVisible(true);
+        awardCharacter.initPosition();
+        awardCharacter.initSpeed();
+        return awardCharacter;
+    }
+
+    recoverAwardCharacter(awardCharacter) {
+        this.awardCharacterPool.push(awardCharacter);
     }
 
 }

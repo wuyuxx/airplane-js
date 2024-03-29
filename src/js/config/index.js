@@ -21,7 +21,7 @@ export default {
             initialWidth: 60,
             initialHeight: 60,
             initialSpeed: 2,
-            initialGenerateInterval: 1200
+            initialGenerateInterval: 600
         }
     }
 };

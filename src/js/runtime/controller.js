@@ -112,15 +112,18 @@ export default class Controller {
                     break;
                 }
             }
-            for (const character of this.characters) {
-                if (enemy.isCollideWith(character, 10, 30)) {
+            for (let i = 0; i < this.characters.length; i++) {
+                if (enemy.isCollideWith(this.characters[i], 10, 30)) {
                     enemy.isVisible(false);
-                    this.characters.shift();
+                    this.characters.splice(i, 1);
                     if (this.characters.length === 0) {
                         this.gameOver = true;
                     }
                     break;
                 }
+            }
+            for (const character of this.characters) {
+
             }
         }
         // 奖励机碰撞检测

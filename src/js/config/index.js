@@ -15,13 +15,5 @@ export default {
         initialHeight: 60,
         initialSpeed: 2,
         initialGenerateInterval: 15
-    },
-    award: {
-        character: {
-            initialWidth: 60,
-            initialHeight: 60,
-            initialSpeed: 2,
-            initialGenerateInterval: 600
-        }
     }
 };
